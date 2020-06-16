@@ -1,36 +1,35 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
 library(shiny)
 
 ui <- fixedPage(
-  div(
-    titlePanel("NCBI (ajaxfields) test application"),
-    div(class='row',
-      div(class='col-md-6', div(ajaxfields::draw('ncbi', 'simple'))),
-      div(class='col-md-6', div(ajaxfields::draw('ncbi2', 'elasticsearch')))
+  shiny::div(
+    shiny::titlePanel("NCBI (ajaxfields) test application"),
+    shiny::hr(),
+    
+    shiny::h3('Engine elasticsearch'),
+    shiny::div(class='row',
+       shiny::div(class='col-md-6', ajaxfields::draw('elasticsearch', 'NCBI Taxonomy')),
+       shiny::div(class='col-md-6', shiny::tableOutput('elasticsearchDump'))
+    ),
+
+    shiny::h3('Engine simple (MariaDb)'),
+    shiny::div(class='row',
+      shiny::div(class='col-md-6', ajaxfields::draw('simple', 'NCBI Taxonomy')),
+      shiny::div(class='col-md-6', shiny::tableOutput('simpleDump'))
     )
   )
 )
 
 server <- function(input, output, session) {
-  ncbiData <- callModule(ajaxfields::observer, "ncbi")
-  ajaxfields::loadEngine(session, 'ncbi', 'simple', 'https://ncbi.dafne.prv.ovh')
-  ncbi2Data <- callModule(ajaxfields::observer, "ncbi2")
-  ajaxfields::loadEngine(session, 'ncbi2', 'es', 'http://lucene.dafne.prv.ovh/ncbi/')
+  simpleData <- shiny::callModule(ajaxfields::observer, "simple")
+  ajaxfields::loadEngine(session, 'simple', 'simple', 'https://ncbi.dafne.prv.ovh', 500, 'ncbi:ncbi')
   
-  observe({
-    dput(ncbiData())
-    dput(ncbi2Data())
+  elasticsearchData <- shiny::callModule(ajaxfields::observer, "elasticsearch")
+  ajaxfields::loadEngine(session, 'elasticsearch', 'es', 'http://lucene.dafne.prv.ovh/ncbi/_search', 500)
+  
+  shiny::observe({
+      output$simpleDump <- renderTable(simpleData())
+      output$elasticsearchDump <- renderTable(elasticsearchData())
   })
 }
-
-# Run the application 
 shinyApp(ui = ui, server = server)
 
