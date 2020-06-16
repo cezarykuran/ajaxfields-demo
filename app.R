@@ -21,7 +21,7 @@ ui <- fixedPage(
 
 server <- function(input, output, session) {
   simpleData <- shiny::callModule(ajaxfields::observer, "simple")
-  ajaxfields::loadEngine(session, 'simple', 'simple', 'https://ncbi.dafne.prv.ovh', 500, 'ncbi:ncbi')
+  ajaxfields::loadEngine(session, 'simple', 'simple', 'https://ncbi.dafne.prv.ovh', 500)
   
   elasticsearchData <- shiny::callModule(ajaxfields::observer, "elasticsearch")
   ajaxfields::loadEngine(session, 'elasticsearch', 'es', 'http://lucene.dafne.prv.ovh/ncbi/_search', 500)
